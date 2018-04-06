@@ -23,7 +23,7 @@ class SessionCreate extends React.PureComponent {
               const result = await createSession({ variables: values });
               if (result.data.createSession) {
                 this.props.history.push(
-                  `/sessions/${result.data.createSession.id}`,
+                  `/sessions/${result.data.createSession.id}/join`,
                 );
               }
             }}
