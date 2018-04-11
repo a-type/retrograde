@@ -112,9 +112,10 @@ class Repo {
     };
   }
 
-  createCard(columnId, text = '') {
+  createCard(columnId, userId, text = '') {
     const card = {
       id: uuid(),
+      user: userId,
       text,
     };
 
@@ -124,7 +125,11 @@ class Repo {
   }
 
   getCard(id) {
-    return cards[id];
+    const card = cards[id];
+    return {
+      ...card,
+      user: this.getUser(card.user),
+    };
   }
 
   listCards(columnId) {
@@ -132,12 +137,15 @@ class Repo {
   }
 
   updateCard(id, args) {
-    Object.apply(cards[id], args);
-    return this.getCard(id);
+    const card = this.getCard(id);
+    Object.apply(card, {
+      text: args.text,
+    });
+    return card;
   }
 
   deleteCard(id) {
-    const card = cards[id];
+    const card = getCard(id);
     delete cards[id];
     return card;
   }

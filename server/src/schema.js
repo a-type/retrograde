@@ -5,11 +5,23 @@ const typeDefs = `
   type Query {
     me: User!
     session(id: ID!): Session!
+    card(id: ID!): Card!
+    cards(sessionId: ID!): [Card!]!
+    column(id: ID!): Column!
+    columns(sessionId: ID!): [Column!]!
   }
 
   type Mutation {
     createSession(name: String!): Session!
     createUser(sessionId: ID!, name: String!): AuthPayload!
+
+    createCard(columnId: ID!, text: String): Card!
+    updateCard(id: ID!, text: String!): Card!
+    deleteCard(id: ID!): Card!
+
+    createColumn(sessionId: ID!, name: String!): Column!
+    updateColumn(id: ID!, name: String!): Column!
+    deleteColumn(id: ID!): Column!
   }
 
   type AuthPayload {
