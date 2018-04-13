@@ -25,15 +25,15 @@ const typeDefs = `
   }
 
   type Subscription {
-    columnCreated(sessionId: ID!): Column
-    columnUpdated(sessionId: ID!): Column
-    columnDeleted(sessionId: ID!): Column
-    cardCreated(sessionId: ID!): Card
-    cardUpdated(sessionId: ID!): Card
-    cardDeleted(sessionId: ID!): Card
-    userCreated(sessionId: ID!): User
-    userUpdated(sessionId: ID!): User
-    userDeleted(sessionId: ID!): User
+    columnCreated: Column
+    columnUpdated: Column
+    columnDeleted: Column
+    cardCreated: Card
+    cardUpdated: Card
+    cardDeleted: Card
+    userCreated: User
+    userUpdated: User
+    userDeleted: User
   }
 
   type AuthPayload {

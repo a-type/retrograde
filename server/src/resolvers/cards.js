@@ -1,6 +1,7 @@
 import repo from '../repo';
 import { authorizeColumn } from './authorize';
 import pubsub from '../pubsub';
+import { withFilter } from 'graphql-subscriptions';
 
 export default {
   Query: {
@@ -17,7 +18,10 @@ export default {
     createCard(_parent, { columnId, text }, context) {
       authorizeColumn(columnId, context);
       const card = repo.createCard(columnId, text);
-      pubsub.publish('cardCreated', { cardCreated: card });
+      pubsub.publish('cardCreated', {
+        cardCreated: card,
+        sessionId: context.sessionId,
+      });
       return card;
     },
 
@@ -28,7 +32,10 @@ export default {
       }
 
       const updated = repo.updateCard(id, { text });
-      pubsub.publish('cardUpdated', { cardUpdated: updated });
+      pubsub.publish('cardUpdated', {
+        cardUpdated: updated,
+        sessionId: context.sessionId,
+      });
       return updated;
     },
 
@@ -39,19 +46,37 @@ export default {
       }
 
       const deleted = repo.deleteCard(id);
-      pubsub.publish('cardDeleted', { cardDeleted: deleted });
+      pubsub.publish('cardDeleted', {
+        cardDeleted: deleted,
+        sessionId: context.sessionId,
+      });
       return deleted;
     },
   },
   Subscription: {
     cardCreated: {
-      subscribe: () => pubsub.asyncIterator('cardCreated'),
+      subscribe: () =>
+        withFilter(
+          pubsub.asyncIterator('cardCreated'),
+          (payload, _variables, context) =>
+            context.sessionId === payload.sessionId,
+        ),
     },
     cardUpdated: {
-      subscribe: () => pubsub.asyncIterator('cardUpdated'),
+      subscribe: () =>
+        withFilter(
+          pubsub.asyncIterator('cardUpdated'),
+          (payload, _variables, context) =>
+            context.sessionId === payload.sessionId,
+        ),
     },
     cardDeleted: {
-      subscribe: () => pubsub.asyncIterator('cardDeleted'),
+      subscribe: () =>
+        withFilter(
+          pubsub.asyncIterator('cardDeleted'),
+          (payload, _variables, context) =>
+            context.sessionId === payload.sessionId,
+        ),
     },
   },
 };
