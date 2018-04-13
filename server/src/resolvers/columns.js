@@ -1,5 +1,5 @@
 const repo = require('../repo');
-import { authorizeSession, authorizeColumn } from './authorize';
+const { authorizeSession, authorizeColumn } = require('./authorize');
 
 module.exports = {
   Query: {

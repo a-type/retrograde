@@ -1,12 +1,12 @@
 const repo = require('../repo');
-import { authorizeColumn } from './authorize';
+const { authorizeColumn } = require('./authorize');
 
 module.exports = {
   Query: {
     cards(_parent, { columnId }, { context }) {
       authorizeColumn(columnId, context);
       return repo.listCards(columnId);
-    }
+    },
     card(_parent, { id }) {
       authorizeColumn(columnId, context);
       return repo.getCard(id);
@@ -35,5 +35,5 @@ module.exports = {
 
       return repo.deleteCard(id);
     },
-  }
-}
+  },
+};
