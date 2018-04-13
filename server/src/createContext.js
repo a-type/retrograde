@@ -3,13 +3,8 @@ const repo = require('./repo');
 
 const SECRET = process.env.JWT_SECRET || 'notsecret';
 
-module.exports = req => {
-  const header = req.get('Authorization');
-  if (!header) {
-    return {};
-  }
-
-  const token = jwt.verify(header.replace('Bearer ', ''), SECRET);
+module.exports = rawToken => {
+  const token = jwt.verify(rawToken, SECRET);
 
   return {
     userId: token.userId,

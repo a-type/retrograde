@@ -1,5 +1,6 @@
 const repo = require('../repo');
 const { authorizeColumn } = require('./authorize');
+const pubsub = require('../pubsub');
 
 module.exports = {
   Query: {
@@ -15,7 +16,9 @@ module.exports = {
   Mutation: {
     createCard(_parent, { columnId, text }, context) {
       authorizeColumn(columnId, context);
-      return repo.createCard(columnId, text);
+      const card = repo.createCard(columnId, text);
+      pubsub.publish('cardCreated', { cardCreated: card });
+      return card;
     },
 
     updateCard(_parent, { id, text }, context) {
@@ -24,7 +27,9 @@ module.exports = {
         throw new Error('Forbidden');
       }
 
-      return repo.updateCard(id, { text });
+      const updated = repo.updateCard(id, { text });
+      pubsub.publish('cardUpdated', { cardUpdated: updated });
+      return updated;
     },
 
     deleteCard(_parent, { id }, context) {
@@ -33,7 +38,20 @@ module.exports = {
         throw new Error('Forbidden');
       }
 
-      return repo.deleteCard(id);
+      const deleted = repo.deleteCard(id);
+      pubsub.publish('cardDeleted', { cardDeleted: deleted });
+      return deleted;
+    },
+  },
+  Subscription: {
+    cardCreated: {
+      subscribe: () => pubsub.asyncIterator('cardCreated'),
+    },
+    cardUpdated: {
+      subscribe: () => pubsub.asyncIterator('cardUpdated'),
+    },
+    cardDeleted: {
+      subscribe: () => pubsub.asyncIterator('cardDeleted'),
     },
   },
 };

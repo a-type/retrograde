@@ -16,4 +16,9 @@ module.exports = {
     ...cards.Mutation,
     ...columns.Mutation,
   },
+  Subscription: {
+    ...users.Subscription,
+    ...cards.Subscription,
+    ...columns.Subscription,
+  },
 };

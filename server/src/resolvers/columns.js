@@ -1,5 +1,6 @@
 const repo = require('../repo');
 const { authorizeSession, authorizeColumn } = require('./authorize');
+const pubsub = require('../pubsub');
 
 module.exports = {
   Query: {
@@ -21,17 +22,34 @@ module.exports = {
       if (!context.sessionId) {
         throw new Error('You are not participating in a session');
       }
-      return repo.createColumn(context.sessionId, name);
+      const column = repo.createColumn(context.sessionId, name);
+      pubsub.publish('columnCreated', { columnCreated: column });
+      return column;
     },
 
     updateColumn(_parent, { id, name }, context) {
       authorizeColumn(id, context);
-      return repo.updateColumn(id, { name });
+      const column = repo.updateColumn(id, { name });
+      pubsub.publish('columnUpdated', { columnUpdated: column });
+      return column;
     },
 
     deleteColumn(_parent, { id }, context) {
       authorizeColumn(id, context);
-      return repo.deleteColumn(id);
+      const column = repo.deleteColumn(id);
+      pubsub.publish('columnDeleted', { columnDeleted: column });
+      return column;
+    },
+  },
+  Subscription: {
+    columnCreated: {
+      subscribe: () => pubsub.asyncIterator('columnCreated'),
+    },
+    columnUpdated: {
+      subscribe: () => pubsub.asyncIterator('columnUpdated'),
+    },
+    columnDeleted: {
+      subscribe: () => pubsub.asyncIterator('columnDeleted'),
     },
   },
 };

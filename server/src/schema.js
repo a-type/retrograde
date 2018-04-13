@@ -24,6 +24,18 @@ const typeDefs = `
     deleteColumn(id: ID!): Column!
   }
 
+  type Subscription {
+    columnCreated(sessionId: ID!): Column
+    columnUpdated(sessionId: ID!): Column
+    columnDeleted(sessionId: ID!): Column
+    cardCreated(sessionId: ID!): Card
+    cardUpdated(sessionId: ID!): Card
+    cardDeleted(sessionId: ID!): Card
+    userCreated(sessionId: ID!): User
+    userUpdated(sessionId: ID!): User
+    userDeleted(sessionId: ID!): User
+  }
+
   type AuthPayload {
     token: String!
   }
