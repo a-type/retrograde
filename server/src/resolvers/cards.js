@@ -1,8 +1,8 @@
-const repo = require('../repo');
-const { authorizeColumn } = require('./authorize');
-const pubsub = require('../pubsub');
+import repo from '../repo';
+import { authorizeColumn } from './authorize';
+import pubsub from '../pubsub';
 
-module.exports = {
+export default {
   Query: {
     cards(_parent, { columnId }, context) {
       authorizeColumn(columnId, context);

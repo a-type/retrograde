@@ -1,11 +1,11 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const { graphqlExpress, graphiqlExpress } = require('apollo-server-express');
-const schema = require('./schema');
-const createContext = require('./createContext');
-const { createServer } = require('http');
-const { SubscriptionServer } = require('subscriptions-transport-ws');
-const { execute, subscribe } = require('graphql');
+import express from 'express';
+import bodyParser from 'body-parser';
+import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
+import schema from './schema';
+import createContext from './createContext';
+import { createServer } from 'http';
+import { SubscriptionServer } from 'subscriptions-transport-ws';
+import { execute, subscribe } from 'graphql';
 
 const port = process.env.PORT || 4000;
 

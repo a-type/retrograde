@@ -1,6 +1,6 @@
-const repo = require('../repo');
+import repo from '../repo';
 
-module.exports = {
+export default {
   Query: {
     session(_parent, { id }) {
       return repo.getSession(id);

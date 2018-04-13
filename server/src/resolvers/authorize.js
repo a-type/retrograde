@@ -1,6 +1,6 @@
-const repo = require('../repo');
+import repo from '../repo';
 
-module.exports = {
+export default {
   authorizeSession: (sessionId, context) => sessionId === context.sessionId,
 
   authorizeColumn: (columnId, context) => {

@@ -1,9 +1,9 @@
-const jwt = require('jsonwebtoken');
-const repo = require('./repo');
+import jwt from 'jsonwebtoken';
+import repo from './repo';
 
 const SECRET = process.env.JWT_SECRET || 'notsecret';
 
-module.exports = rawToken => {
+export default rawToken => {
   const token = jwt.verify(rawToken, SECRET);
 
   return {

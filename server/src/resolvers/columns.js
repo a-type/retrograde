@@ -1,8 +1,8 @@
-const repo = require('../repo');
-const { authorizeSession, authorizeColumn } = require('./authorize');
-const pubsub = require('../pubsub');
+import repo from '../repo';
+import { authorizeSession, authorizeColumn } from './authorize';
+import pubsub from '../pubsub';
 
-module.exports = {
+export default {
   Query: {
     columns(_parent, _args, context) {
       if (!context.sessionId) {

@@ -1,10 +1,10 @@
-const repo = require('../repo');
-const jwt = require('jsonwebtoken');
-const pubsub = require('../pubsub');
+import repo from '../repo';
+import jwt from 'jsonwebtoken';
+import pubsub from '../pubsub';
 
 const SECRET = process.env.JWT_SECRET || 'notsecret';
 
-module.exports = {
+export default {
   Query: {
     me(_parent, _args, context) {
       return context.user;

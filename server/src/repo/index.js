@@ -1,4 +1,4 @@
-const uuid = require('uuid');
+import uuid from 'uuid';
 
 const users = {};
 const sessions = {};
@@ -190,4 +190,4 @@ class Repo {
   }
 }
 
-module.exports = new Repo();
+export default new Repo();
