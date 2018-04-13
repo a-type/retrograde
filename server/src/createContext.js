@@ -12,7 +12,9 @@ module.exports = req => {
   const token = jwt.verify(header.replace('Bearer ', ''), SECRET);
 
   return {
+    userId: token.userId,
     user: repo.getUser(token.userId),
+    sessionId: token.sessionId,
     session: repo.getSession(token.sessionId),
   };
 };

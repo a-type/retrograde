@@ -3,9 +3,11 @@ const { authorizeSession, authorizeColumn } = require('./authorize');
 
 module.exports = {
   Query: {
-    columns(_parent, { sessionId }, { context }) {
-      authorizeSession(sessionId, context);
-      return repo.listColumns(sessionId);
+    columns(_parent, _args, context) {
+      if (!context.sessionId) {
+        throw new Error('You are not participating in a session');
+      }
+      return repo.listColumns(context.sessionId);
     },
 
     column(_parent, { id }, context) {
@@ -15,17 +17,19 @@ module.exports = {
   },
 
   Mutation: {
-    createColumn(_parent, { sessionId, name }, { context }) {
-      authorizeSession(sessionId, context);
-      return repo.createColumn(sessionId, name);
+    createColumn(_parent, { name }, context) {
+      if (!context.sessionId) {
+        throw new Error('You are not participating in a session');
+      }
+      return repo.createColumn(context.sessionId, name);
     },
 
-    updateColumn(_parent, { id, name }, { context }) {
+    updateColumn(_parent, { id, name }, context) {
       authorizeColumn(id, context);
       return repo.updateColumn(id, { name });
     },
 
-    deleteColumn(_parent, { id }, { context }) {
+    deleteColumn(_parent, { id }, context) {
       authorizeColumn(id, context);
       return repo.deleteColumn(id);
     },

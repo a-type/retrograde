@@ -5,7 +5,7 @@ const SECRET = process.env.JWT_SECRET || 'notsecret';
 
 module.exports = {
   Query: {
-    me(_parent, _args, { context }) {
+    me(_parent, _args, context) {
       return context.user;
     },
   },

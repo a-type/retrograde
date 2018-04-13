@@ -6,6 +6,32 @@ const columns = {};
 const cards = {};
 
 class Repo {
+  constructor() {
+    [
+      'createSession',
+      'getSession',
+      'updateSession',
+      'deleteSession',
+      'createUser',
+      'getUser',
+      'updateUser',
+      'deleteUser',
+      'createColumn',
+      'getColumn',
+      'listColumns',
+      'updateColumn',
+      'deleteColumn',
+      'createCard',
+      'getCard',
+      'listCards',
+      'updateCard',
+      'deleteCard',
+    ].reduce(
+      (acc, name) => Object.assign(acc, name, this[name].bind(this)),
+      this,
+    );
+  }
+
   createSession(name) {
     const session = {
       id: uuid(),
@@ -20,10 +46,14 @@ class Repo {
 
   getSession(id) {
     const session = sessions[id];
+    if (!session) {
+      return null;
+    }
+
     return {
       ...session,
-      columns: session.columns.map(this.getColumn),
-      users: session.users.map(this.getUser),
+      columns: session.columns.map(this.getColumn.bind(this)),
+      users: session.users.map(this.getUser.bind(this)),
     };
   }
 
@@ -56,16 +86,16 @@ class Repo {
   }
 
   getUser(id) {
-    return users[id];
+    return users[id] || null;
   }
 
   listUsers(sessionId) {
-    return sessions[sessionId].users.map(this.getUser);
+    return sessions[sessionId].users.map(this.getUser.bind(this));
   }
 
   updateUser(id, args) {
     Object.apply(users[id], args);
-    return this.getUser(id);
+    return this.getUser.bind(this)(id);
   }
 
   deleteUser(id) {
@@ -78,6 +108,7 @@ class Repo {
     const column = {
       id: uuid(),
       name,
+      cards: [],
     };
 
     columns[column.id] = column;
@@ -87,24 +118,28 @@ class Repo {
 
   getColumn(id) {
     const column = columns[id];
+    if (!column) {
+      return null;
+    }
+
     return {
       ...column,
-      cards: column.cards.map(this.getCard),
+      cards: column.cards.map(this.getCard.bind(this)),
     };
   }
 
   listColumns(sessionId) {
-    return sessions[sessionId].columns.map(this.getColumn);
+    return sessions[sessionId].columns.map(this.getColumn.bind(this));
   }
 
   updateColumn(id, args) {
     Object.apply(columns[id], args);
-    return this.getColumn(id);
+    return this.getColumn.bind(this)(id);
   }
 
   deleteColumn(id) {
     const column = columns[id];
-    const cards = column.cards.map(this.deleteCard);
+    const cards = column.cards.map(this.deleteCard.bind(this));
     delete columns[id];
     return {
       ...column,
@@ -126,18 +161,22 @@ class Repo {
 
   getCard(id) {
     const card = cards[id];
+    if (!card) {
+      return null;
+    }
+
     return {
       ...card,
-      user: this.getUser(card.user),
+      user: this.getUser.bind(this)(card.user),
     };
   }
 
   listCards(columnId) {
-    return columns[columnId].cards.map(this.getCard);
+    return columns[columnId].cards.map(this.getCard.bind(this));
   }
 
   updateCard(id, args) {
-    const card = this.getCard(id);
+    const card = this.getCard.bind(this)(id);
     Object.apply(card, {
       text: args.text,
     });
@@ -145,7 +184,7 @@ class Repo {
   }
 
   deleteCard(id) {
-    const card = getCard(id);
+    const card = this.getCard.bind(this)(id);
     delete cards[id];
     return card;
   }

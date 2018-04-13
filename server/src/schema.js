@@ -19,7 +19,7 @@ const typeDefs = `
     updateCard(id: ID!, text: String!): Card!
     deleteCard(id: ID!): Card!
 
-    createColumn(sessionId: ID!, name: String!): Column!
+    createColumn(name: String!): Column!
     updateColumn(id: ID!, name: String!): Column!
     deleteColumn(id: ID!): Column!
   }
