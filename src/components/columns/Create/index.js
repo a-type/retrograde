@@ -17,7 +17,12 @@ export default class ColumnCreate extends React.PureComponent {
     return (
       <Mutation mutation={CREATE_COLUMN}>
         {createColumn => (
-          <Form onSubmit={values => createColumn({ variables: values })} />
+          <Form
+            onSubmit={async values => {
+              await createColumn({ variables: values });
+              this.props.onCreate();
+            }}
+          />
         )}
       </Mutation>
     );

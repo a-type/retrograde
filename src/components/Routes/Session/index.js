@@ -6,10 +6,10 @@ import CreateUser from 'components/users/Create';
 export default class Session extends React.PureComponent {
   render() {
     return (
-      <div>
+      <React.Fragment>
         <Route path="/sessions/:id/join" component={CreateUser} />
         <SessionView sessionId={this.props.match.params.id} />
-      </div>
+      </React.Fragment>
     );
   }
 }

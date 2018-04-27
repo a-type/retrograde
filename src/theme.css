@@ -1,0 +1,23 @@
+:root {
+  --font-brand: 'Shrikhand', sans-serif;
+  --font-default: 'Open Sans', Arial, Helvetica, sans-serif;
+
+  --font-size-default: 16px;
+
+  --color-white: #fff;
+  --color-black: #323242;
+
+  --color-gray: #dededf;
+  --color-gray-dark: #a3a3a6;
+
+  --color-light: #fff6ef;
+  --color-dark: #59569d;
+  --color-accent: #f25292;
+  --color-primary: #fea096;
+}
+
+#root {
+  background-color: var(--color-black);
+  color: var(--color-white);
+  font-size: var(--font-size-default);
+}

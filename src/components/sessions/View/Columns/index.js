@@ -10,7 +10,7 @@ export default class SessionViewColumns extends React.PureComponent {
         {this.props.columns.map(column => (
           <Column key={column.id} column={column} />
         ))}
-        <CreateColumn />
+        <CreateColumn onCreate={this.props.onCreate} />
       </Layout>
     );
   }
