@@ -1,4 +1,5 @@
 import { withFilter } from 'graphql-subscriptions';
+import pubsub from '../../pubsub';
 
 export const typeDefs = `
   type Column {
@@ -41,7 +42,7 @@ export const resolvers = {
   },
 
   Mutation: {
-    createColumn(_parent, { name }, { repo, pubsub }) {
+    createColumn(_parent, { name }, { repo }) {
       const column = repo.createColumn(context.sessionId, name);
       pubsub.publish('columnCreated', {
         columnCreated: column,
@@ -50,7 +51,7 @@ export const resolvers = {
       return column;
     },
 
-    updateColumn(_parent, { id, name }, { repo, pubsub }) {
+    updateColumn(_parent, { id, name }, { repo }) {
       const column = repo.updateColumn(id, { name });
       pubsub.publish('columnUpdated', {
         columnUpdated: column,
@@ -59,7 +60,7 @@ export const resolvers = {
       return column;
     },
 
-    deleteColumn(_parent, { id }, { repo, pubsub }) {
+    deleteColumn(_parent, { id }, { repo }) {
       const column = repo.deleteColumn(id);
       pubsub.publish('columnDeleted', {
         columnDeleted: column,
@@ -72,7 +73,7 @@ export const resolvers = {
     columnCreated: {
       subscribe: () =>
         withFilter(
-          pubsub.asyncIterator('columnCreated'),
+          () => pubsub.asyncIterator('columnCreated'),
           (payload, _variables, context) =>
             context.sessionId === payload.sessionId,
         ),
@@ -80,7 +81,7 @@ export const resolvers = {
     columnUpdated: {
       subscribe: () =>
         withFilter(
-          pubsub.asyncIterator('columnUpdated'),
+          () => pubsub.asyncIterator('columnUpdated'),
           (payload, _variables, context) =>
             context.sessionId === payload.sessionId,
         ),
@@ -88,7 +89,7 @@ export const resolvers = {
     columnDeleted: {
       subscribe: () =>
         withFilter(
-          pubsub.asyncIterator('columnDeleted'),
+          () => pubsub.asyncIterator('columnDeleted'),
           (payload, _variables, context) =>
             context.sessionId === payload.sessionId,
         ),

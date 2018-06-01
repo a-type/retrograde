@@ -5,5 +5,7 @@ export const authTokenHeader = () =>
     ? `Bearer ${localStorage.getItem(AUTH_TOKEN_KEY)}`
     : '';
 
+export const rawAuthToken = () => localStorage.getItem(AUTH_TOKEN_KEY);
+
 export const storeAuthToken = token =>
   localStorage.setItem(AUTH_TOKEN_KEY, token);

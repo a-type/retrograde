@@ -4,6 +4,10 @@ import User from 'components/users/View';
 import { H2 } from 'components/generic';
 
 export default class SessionUsers extends React.Component {
+  componentDidMount() {
+    this.props.subscribe();
+  }
+
   renderUser = user => <User user={user} />;
 
   render() {

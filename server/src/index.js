@@ -49,9 +49,9 @@ server.listen(port, () => {
       schema,
       execute,
       subscribe,
-      onConnect: (connectionParams, websocket) => {
+      onConnect: async (connectionParams, websocket) => {
         if (connectionParams.authToken) {
-          return createContext(connectionParams.authToken);
+          return await createContext(connectionParams.authToken);
         }
       },
     },

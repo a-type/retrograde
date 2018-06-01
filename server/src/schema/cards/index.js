@@ -1,4 +1,5 @@
 import { withFilter } from 'graphql-subscriptions';
+import pubsub from '../../pubsub';
 
 export const typeDefs = `
   type Card {
@@ -39,7 +40,7 @@ export const resolvers = {
     },
   },
   Mutation: {
-    createCard(_parent, { columnId, text }, { repo, pubsub }) {
+    createCard(_parent, { columnId, text }, { repo }) {
       const card = repo.createCard(columnId, text);
       pubsub.publish('cardCreated', {
         cardCreated: card,
@@ -48,7 +49,7 @@ export const resolvers = {
       return card;
     },
 
-    updateCard(_parent, { id, text }, { repo, pubsub }) {
+    updateCard(_parent, { id, text }, { repo }) {
       const updated = repo.updateCard(id, { text });
       pubsub.publish('cardUpdated', {
         cardUpdated: updated,
@@ -57,7 +58,7 @@ export const resolvers = {
       return updated;
     },
 
-    deleteCard(_parent, { id }, { repo, pubsub }) {
+    deleteCard(_parent, { id }, { repo }) {
       const deleted = repo.deleteCard(id);
       pubsub.publish('cardDeleted', {
         cardDeleted: deleted,
@@ -70,7 +71,7 @@ export const resolvers = {
     cardCreated: {
       subscribe: () =>
         withFilter(
-          pubsub.asyncIterator('cardCreated'),
+          () => pubsub.asyncIterator('cardCreated'),
           (payload, _variables, context) =>
             context.sessionId === payload.sessionId,
         ),
@@ -78,7 +79,7 @@ export const resolvers = {
     cardUpdated: {
       subscribe: () =>
         withFilter(
-          pubsub.asyncIterator('cardUpdated'),
+          () => pubsub.asyncIterator('cardUpdated'),
           (payload, _variables, context) =>
             context.sessionId === payload.sessionId,
         ),
@@ -86,7 +87,7 @@ export const resolvers = {
     cardDeleted: {
       subscribe: () =>
         withFilter(
-          pubsub.asyncIterator('cardDeleted'),
+          () => pubsub.asyncIterator('cardDeleted'),
           (payload, _variables, context) =>
             context.sessionId === payload.sessionId,
         ),
