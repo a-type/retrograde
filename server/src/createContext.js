@@ -1,15 +1,19 @@
 import jwt from 'jsonwebtoken';
-import repo from './repo';
+import { load } from './repo';
+import pubsub from './pubsub';
 
 const SECRET = process.env.JWT_SECRET || 'notsecret';
 
-export default rawToken => {
-  const token = jwt.verify(rawToken, SECRET);
+export default async rawToken => {
+  const repo = await load();
+  const token = rawToken ? jwt.verify(rawToken, SECRET) : null;
 
   return {
-    userId: token.userId,
-    user: repo.getUser(token.userId),
-    sessionId: token.sessionId,
-    session: repo.getSession(token.sessionId),
+    userId: token ? token.userId : null,
+    user: token ? repo.getUser(token.userId) : null,
+    sessionId: token ? token.sessionId : null,
+    session: token ? repo.getSession(token.sessionId) : null,
+    repo,
+    pubsub,
   };
 };

@@ -1,28 +1,47 @@
-import repo from '../repo';
-import { authorizeSession, authorizeColumn } from './authorize';
-import pubsub from '../pubsub';
 import { withFilter } from 'graphql-subscriptions';
 
-export default {
-  Query: {
-    columns(_parent, _args, context) {
-      if (!context.sessionId) {
-        throw new Error('You are not participating in a session');
-      }
-      return repo.listColumns(context.sessionId);
-    },
+export const typeDefs = `
+  type Column {
+    id: ID!
+    name: String!
+  }
 
-    column(_parent, { id }, context) {
-      authorizeColumn(id, context);
+  extend type Query {
+    column(id: ID!): Column! @columnAccess
+  }
+
+  extend type Session {
+    columns: [Column!]!
+  }
+
+  extend type Mutation {
+    createColumn(name: String!): Column! @inSession
+    updateColumn(id: ID!, name: String!): Column! @columnAccess
+    deleteColumn(id: ID!): Column! @columnAccess
+  }
+
+  extend type Subscription {
+    columnCreated: Column
+    columnUpdated: Column
+    columnDeleted: Column
+  }
+`;
+
+export const resolvers = {
+  Query: {
+    column(_parent, { id }, { repo }) {
       return repo.getColumn(id);
     },
   },
 
+  Session: {
+    columns(parent, _args, { repo }) {
+      return Promise.all(parent.columns.map(repo.getColumn));
+    },
+  },
+
   Mutation: {
-    createColumn(_parent, { name }, context) {
-      if (!context.sessionId) {
-        throw new Error('You are not participating in a session');
-      }
+    createColumn(_parent, { name }, { repo, pubsub }) {
       const column = repo.createColumn(context.sessionId, name);
       pubsub.publish('columnCreated', {
         columnCreated: column,
@@ -31,8 +50,7 @@ export default {
       return column;
     },
 
-    updateColumn(_parent, { id, name }, context) {
-      authorizeColumn(id, context);
+    updateColumn(_parent, { id, name }, { repo, pubsub }) {
       const column = repo.updateColumn(id, { name });
       pubsub.publish('columnUpdated', {
         columnUpdated: column,
@@ -41,8 +59,7 @@ export default {
       return column;
     },
 
-    deleteColumn(_parent, { id }, context) {
-      authorizeColumn(id, context);
+    deleteColumn(_parent, { id }, { repo, pubsub }) {
       const column = repo.deleteColumn(id);
       pubsub.publish('columnDeleted', {
         columnDeleted: column,

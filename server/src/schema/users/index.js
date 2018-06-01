@@ -1,20 +1,64 @@
-import repo from '../repo';
 import jwt from 'jsonwebtoken';
-import pubsub from '../pubsub';
 import { withFilter } from 'graphql-subscriptions';
 
 const SECRET = process.env.JWT_SECRET || 'notsecret';
 
-export default {
+export const typeDefs = `
+  type AuthPayload {
+    token: String!
+  }
+
+  type User {
+    id: ID!
+    name: String!
+  }
+
+  extend type Query {
+    me: User
+  }
+
+  extend type Session {
+    users: [User!]!
+  }
+
+  extend type Card {
+    author: User!
+  }
+
+  extend type Mutation {
+    createUser(sessionId: ID!, name: String!): AuthPayload!
+  }
+
+  extend type Subscription {
+    userCreated: User
+    userUpdated: User
+    userDeleted: User
+  }
+`;
+
+export const resolvers = {
   Query: {
     me(_parent, _args, context) {
+      console.log(context);
       return context.user;
     },
   },
 
+  Session: {
+    users(parent, args, { repo }) {
+      return Promise.all(parent.users.map(repo.getUser));
+    },
+  },
+
+  Card: {
+    author(parent, args, { repo }) {
+      return repo.getUser(parent.author);
+    },
+  },
+
   Mutation: {
-    createUser(_parent, { sessionId, name }) {
-      const user = repo.createUser(sessionId, name);
+    createUser: async (_parent, { sessionId, name }, { repo, pubsub }) => {
+      const user = await repo.createUser(sessionId, name);
       const token = jwt.sign({ sessionId, userId: user.id }, SECRET);
       pubsub.publish('userCreated', { userCreated: user, sessionId });
       return { token };

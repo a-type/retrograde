@@ -1,22 +1,45 @@
-import repo from '../repo';
-import { authorizeColumn } from './authorize';
-import pubsub from '../pubsub';
 import { withFilter } from 'graphql-subscriptions';
 
-export default {
+export const typeDefs = `
+  type Card {
+    id: ID!
+    text: String!
+  }
+
+  extend type Query {
+    card(id: ID!): Card @cardAccess
+  }
+
+  extend type Column {
+    cards: [Card!]!
+  }
+
+  extend type Mutation {
+    createCard(columnId: ID!, text: String): Card! @columnAccess(idArg: "columnId")
+    updateCard(id: ID!, text: String!): Card! @cardAccess
+    deleteCard(id: ID!): Card! @cardAccess
+  }
+
+  extend type Subscription {
+    cardCreated: Card
+    cardUpdated: Card
+    cardDeleted: Card
+  }
+`;
+
+export const resolvers = {
   Query: {
-    cards(_parent, { columnId }, context) {
-      authorizeColumn(columnId, context);
-      return repo.listCards(columnId);
-    },
-    card(_parent, { id }) {
-      authorizeColumn(columnId, context);
+    card(_parent, { id }, { repo }) {
       return repo.getCard(id);
     },
   },
+  Column: {
+    cards(parent, args, { repo }) {
+      return Promise.all(parent.cards.map(repo.getCard));
+    },
+  },
   Mutation: {
-    createCard(_parent, { columnId, text }, context) {
-      authorizeColumn(columnId, context);
+    createCard(_parent, { columnId, text }, { repo, pubsub }) {
       const card = repo.createCard(columnId, text);
       pubsub.publish('cardCreated', {
         cardCreated: card,
@@ -25,12 +48,7 @@ export default {
       return card;
     },
 
-    updateCard(_parent, { id, text }, context) {
-      const card = repo.getCard(id);
-      if (card.user.id !== context.userId) {
-        throw new Error('Forbidden');
-      }
-
+    updateCard(_parent, { id, text }, { repo, pubsub }) {
       const updated = repo.updateCard(id, { text });
       pubsub.publish('cardUpdated', {
         cardUpdated: updated,
@@ -39,12 +57,7 @@ export default {
       return updated;
     },
 
-    deleteCard(_parent, { id }, context) {
-      const card = repo.getCard(id);
-      if (card.user.id !== context.userId) {
-        throw new Error('Forbidden');
-      }
-
+    deleteCard(_parent, { id }, { repo, pubsub }) {
       const deleted = repo.deleteCard(id);
       pubsub.publish('cardDeleted', {
         cardDeleted: deleted,

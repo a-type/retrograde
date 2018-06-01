@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
+import { graphqlExpress } from 'apollo-server-express';
+import playground from 'graphql-playground-middleware-express';
 import schema from './schema';
 import createContext from './createContext';
 import { createServer } from 'http';
@@ -11,25 +12,31 @@ const port = process.env.PORT || 4000;
 
 const app = express();
 
-const createHttpContext = req => {
+const createHttpContext = async req => {
   const header = req.get('Authorization');
   if (!header) {
-    return {};
+    return await createContext(null);
   }
 
-  return createContext(header.replace('Bearer ', ''));
+  return await createContext(header.replace('Bearer ', ''));
 };
 
 app.use(
   '/graphql',
   bodyParser.json(),
-  graphqlExpress(req => ({ schema, context: createHttpContext(req) })),
+  graphqlExpress(async req => {
+    const context = await createHttpContext(req);
+    return {
+      schema,
+      context,
+    };
+  }),
 );
 app.use(
-  '/graphiql',
-  graphiqlExpress({
-    endpointURL: '/graphql',
-    subscriptionsEndpoint: `ws://localhost:${port}/subscriptions`,
+  '/playground',
+  playground({
+    endpoint: '/graphql',
+    subscriptionEndpoint: `ws://localhost:${port}/subscriptions`,
   }),
 );
 
