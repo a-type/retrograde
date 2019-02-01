@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "target": "es6",
+    "jsx": "react",
+    "sourceMap": true,
+    "module": "es6",
+    "outDir": "./dist/",
+    "lib": [
+      "dom",
+      "es7",
+      "dom.iterable",
+      "scripthost",
+      "esnext.asynciterable",
+      "es2018.promise",
+      "es7",
+      "es2017"
+    ],
+    // this mimics Babels' behavior of treating module.exports as the
+    // default export in an ES6 import.
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "baseUrl": "./src/"
+  },
+  "include": ["./src/"],
+  "exclude": ["./node_modules/"]
+}

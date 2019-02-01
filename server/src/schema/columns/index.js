@@ -16,7 +16,7 @@ export const typeDefs = `
   }
 
   extend type Mutation {
-    createColumn(name: String!): Column! @inSession
+    createColumn(name: String!): Column!
     updateColumn(id: ID!, name: String!): Column! @columnAccess
     deleteColumn(id: ID!): Column! @columnAccess
   }
@@ -42,29 +42,32 @@ export const resolvers = {
   },
 
   Mutation: {
-    createColumn(_parent, { name }, { repo }) {
-      const column = repo.createColumn(context.sessionId, name);
+    createColumn(_parent, { name }, { repo, sessionId }) {
+      if (!sessionId) {
+        throw new Error("You're not in a session");
+      }
+      const column = repo.createColumn(sessionId, name);
       pubsub.publish('columnCreated', {
         columnCreated: column,
-        sessionId: context.sessionId,
+        sessionId,
       });
       return column;
     },
 
-    updateColumn(_parent, { id, name }, { repo }) {
+    updateColumn(_parent, { id, name }, { repo, sessionId }) {
       const column = repo.updateColumn(id, { name });
       pubsub.publish('columnUpdated', {
         columnUpdated: column,
-        sessionId: context.sessionId,
+        sessionId,
       });
       return column;
     },
 
-    deleteColumn(_parent, { id }, { repo }) {
+    deleteColumn(_parent, { id }, { repo, sessionId }) {
       const column = repo.deleteColumn(id);
       pubsub.publish('columnDeleted', {
         columnDeleted: column,
-        sessionId: context.sessionId,
+        sessionId,
       });
       return column;
     },
