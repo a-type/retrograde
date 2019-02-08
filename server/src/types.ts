@@ -6,6 +6,7 @@ export type User = {
 export type Card = {
   id: string;
   text: string;
+  category: string;
   tags: string[];
   authorId?: string;
   author?: User;
@@ -18,4 +19,5 @@ export type Session = {
   userIds?: string[];
   users?: User[];
   cards?: Card[];
+  categories: string[];
 };

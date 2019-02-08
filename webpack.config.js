@@ -102,12 +102,19 @@ module.exports = {
       progress: 'minimal',
       historyFallback: true,
       static: outputPath,
-      middleware: (app, builtins) =>
+      middleware: (app, builtins) => {
         app.use(
           builtins.proxy('/graphql', {
             target: 'http://localhost:4000/',
           }),
-        ),
+        );
+        app.use(
+          builtins.proxy('/subscriptions', {
+            target: 'http://localhost:4000/',
+            ws: true,
+          }),
+        );
+      },
     }),
   ],
 

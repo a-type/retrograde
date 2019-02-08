@@ -1,11 +1,14 @@
+import { Context } from 'createContext';
+
 export const typeDefs = `
   type Session {
     id: ID!
     name: String!
+    categories: [String!]!
   }
 
   extend type Query {
-    session(id: ID!): Session!
+    session: Session!
   }
 
   extend type Mutation {
@@ -15,13 +18,16 @@ export const typeDefs = `
 
 export const resolvers = {
   Query: {
-    session(_parent, { id }, { repo }) {
-      return repo.getSession(id);
+    session(_parent, _args, { repo, sessionId }: Context) {
+      if (!sessionId) {
+        return null;
+      }
+      return repo.getSession(sessionId);
     },
   },
 
   Mutation: {
-    createSession(_parent, { name }, { repo }) {
+    createSession(_parent, { name }, { repo }: Context) {
       return repo.createSession(name);
     },
   },

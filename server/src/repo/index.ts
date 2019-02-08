@@ -4,7 +4,7 @@ import FileAsync from 'lowdb/adapters/FileAsync';
 import R from 'ramda';
 import { User, Card, Session } from '../types';
 
-class Repo {
+export class Repo {
   db: any;
 
   constructor(db) {
@@ -17,6 +17,7 @@ class Repo {
       name,
       userIds: [],
       cardIds: [],
+      categories: ['Start', 'Stop', 'Continue'],
     };
 
     await this.db('sessions').write(R.assoc(session.id, session));
@@ -69,6 +70,7 @@ class Repo {
   ): Promise<Card> => {
     const card: Card = {
       text: '',
+      category: '',
       tags: [],
       ...init,
       id: uuid(),
@@ -100,5 +102,6 @@ const adapter = new FileAsync('db.json', {
     cards: {},
   },
 });
-const repo = low(adapter).then(db => new Repo(db));
-export const load = () => repo;
+const loadRepo = (): Promise<Repo> => low(adapter).then(db => new Repo(db));
+
+export default loadRepo;

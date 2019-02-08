@@ -61,7 +61,7 @@ export const resolvers = {
     createUser: async (_parent, { sessionId, name }, { repo }) => {
       const user = await repo.createUser(sessionId, name);
       const token = jwt.sign({ sessionId, userId: user.id, name }, SECRET);
-      pubsub.publish('userCreated', { userCreated: user, sessionId });
+      //pubsub.publish('userCreated', { userCreated: user, sessionId });
       return { token };
     },
   },
