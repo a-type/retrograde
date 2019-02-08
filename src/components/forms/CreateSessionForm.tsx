@@ -37,12 +37,10 @@ const CreateSessionForm: SFC<CreateSessionFormProps> = ({
         const result = await mutate({
           variables: { name: ev.value.name },
         });
-        onCreate(result.createSession.id);
+        onCreate(result.data.createSession.id);
       }}
     >
-      <FormField label="Session Name:">
-        <TextInput name="name" />
-      </FormField>
+      <FormField name="name" label="Session Name:" />
       <Button
         onClick={onCancel}
         label="Nevermind"

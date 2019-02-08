@@ -104,7 +104,7 @@ module.exports = {
       static: outputPath,
       middleware: (app, builtins) =>
         app.use(
-          builtins.proxy('/api', {
+          builtins.proxy('/graphql', {
             target: 'http://localhost:4000/',
           }),
         ),
