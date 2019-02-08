@@ -1,14 +1,17 @@
 const path = require('path');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { WebpackPluginServe } = require('webpack-plugin-serve');
 const webpack = require('webpack');
 
+const outputPath = path.resolve(__dirname, './dist');
+
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   watch: process.env.NODE_ENV !== 'production',
-  entry: ['./src/index.tsx', 'webpack-plugin-serve/client'],
+  entry: ['@babel/polyfill', './src/index.tsx', 'webpack-plugin-serve/client'],
   output: {
-    path: path.resolve(__dirname, './dist'),
+    path: outputPath,
     pathinfo: true,
     filename: 'retro.[hash].js',
     chunkFilename: '[name].chunk.js',
@@ -16,11 +19,12 @@ module.exports = {
   },
 
   resolve: {
-    modules: ['node_modules', path.resolve(__dirname, './src')],
+    modules: ['node_modules'],
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     alias: {
       react: path.resolve(__dirname, 'node_modules/react'),
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
+      '@': path.resolve(__dirname, './src'),
     },
   },
 
@@ -35,10 +39,30 @@ module.exports = {
         },
       },
       {
-        test: /\.tsx?$/,
+        test: /\.(j|t)sx?$/,
         include: path.resolve(__dirname, './src'),
         exclude: /node_modules/,
-        use: ['awesome-typescript-loader'],
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              cacheDirectory: true,
+              babelrc: false,
+              presets: [
+                [
+                  '@babel/preset-env',
+                  { targets: { browsers: 'last 2 versions' } },
+                ],
+                '@babel/preset-typescript',
+                '@babel/preset-react',
+              ],
+              plugins: [
+                ['@babel/plugin-proposal-class-properties', { loose: true }],
+                'react-hot-loader/babel',
+              ],
+            },
+          },
+        ],
       },
       {
         test: /\.mjs$/,
@@ -64,6 +88,7 @@ module.exports = {
   },
 
   plugins: [
+    new ForkTsCheckerWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, './public/index.html'),
       inject: 'body',
@@ -72,8 +97,17 @@ module.exports = {
     new webpack.NamedModulesPlugin(),
     new WebpackPluginServe({
       open: true,
-      port: 6000,
+      host: 'localhost',
+      port: 8020,
       progress: 'minimal',
+      historyFallback: true,
+      static: outputPath,
+      middleware: (app, builtins) =>
+        app.use(
+          builtins.proxy('/api', {
+            target: 'http://localhost:4000/',
+          }),
+        ),
     }),
   ],
 
