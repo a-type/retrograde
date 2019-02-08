@@ -5,12 +5,12 @@ import { onError } from 'apollo-link-error';
 import { ApolloLink, Observable, split } from 'apollo-link';
 import { WebSocketLink } from 'apollo-link-ws';
 import { getMainDefinition } from 'apollo-utilities';
-import { authTokenHeader, rawAuthToken } from './auth';
+import auth from './auth';
 
 const cache = new InMemoryCache({});
 
 const request = async operation => {
-  const token = authTokenHeader();
+  const token = auth.authTokenHeader;
   operation.setContext({
     headers: {
       authorization: token,
@@ -49,7 +49,7 @@ const wsLink = new WebSocketLink({
   options: {
     reconnect: true,
     connectionParams: {
-      authToken: rawAuthToken(),
+      authToken: auth.rawAuthToken,
     },
   },
 });

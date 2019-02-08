@@ -12,8 +12,8 @@ export default class CardAccessDirective extends SchemaDirectiveVisitor {
 
       const card = context.repo.getCard(id);
 
-      if (!card.user.id === userId) {
-        throw new Error("You can't do that");
+      if (!card.authorId === userId) {
+        throw new Error("That's not your card");
       }
 
       return resolve(parent, queryArgs, context, info);

@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { withFilter } from 'graphql-subscriptions';
-import pubsub from '../../pubsub';
+import pubsub from '../pubsub';
 
 const SECRET = process.env.JWT_SECRET || 'notsecret';
 
@@ -60,8 +60,7 @@ export const resolvers = {
   Mutation: {
     createUser: async (_parent, { sessionId, name }, { repo }) => {
       const user = await repo.createUser(sessionId, name);
-      const token = jwt.sign({ sessionId, userId: user.id }, SECRET);
-      console.info(`PubSub => userCreated: ${JSON.stringify(user)}`);
+      const token = jwt.sign({ sessionId, userId: user.id, name }, SECRET);
       pubsub.publish('userCreated', { userCreated: user, sessionId });
       return { token };
     },
@@ -72,8 +71,6 @@ export const resolvers = {
       subscribe: withFilter(
         () => pubsub.asyncIterator('userCreated'),
         (payload, _variables, context) => {
-          console.info(context);
-          console.info(payload);
           return context.sessionId === payload.sessionId;
         },
       ),

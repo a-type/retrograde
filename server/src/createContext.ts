@@ -4,7 +4,7 @@ import pubsub from './pubsub';
 
 const SECRET = process.env.JWT_SECRET || 'notsecret';
 
-export default async rawToken => {
+export default async (rawToken: string) => {
   const repo = await load();
   const token = rawToken ? jwt.verify(rawToken, SECRET) : null;
 

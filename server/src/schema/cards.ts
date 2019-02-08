@@ -1,18 +1,19 @@
 import { withFilter } from 'graphql-subscriptions';
-import pubsub from '../../pubsub';
+import pubsub from '../pubsub';
 
 export const typeDefs = `
   type Card {
     id: ID!
     text: String!
+    tags: [String!]!
+  }
+
+  extend type Session {
+    cards: [Card!]! @inSession
   }
 
   extend type Query {
     card(id: ID!): Card @cardAccess
-  }
-
-  extend type Column {
-    cards: [Card!]!
   }
 
   extend type Mutation {
@@ -34,35 +35,35 @@ export const resolvers = {
       return repo.getCard(id);
     },
   },
-  Column: {
-    cards(parent, args, { repo }) {
-      return Promise.all(parent.cards.map(repo.getCard));
+  Session: {
+    cards(parent, _args, { repo, sessionId }) {
+      return Promise.all(parent.cardIds.map(repo.getCard));
     },
   },
   Mutation: {
-    createCard(_parent, { columnId, text }, { repo }) {
+    createCard(_parent, { columnId, text }, { repo, sessionId }) {
       const card = repo.createCard(columnId, text);
       pubsub.publish('cardCreated', {
         cardCreated: card,
-        sessionId: context.sessionId,
+        sessionId: sessionId,
       });
       return card;
     },
 
-    updateCard(_parent, { id, text }, { repo }) {
+    updateCard(_parent, { id, text }, { repo, sessionId }) {
       const updated = repo.updateCard(id, { text });
       pubsub.publish('cardUpdated', {
         cardUpdated: updated,
-        sessionId: context.sessionId,
+        sessionId: sessionId,
       });
       return updated;
     },
 
-    deleteCard(_parent, { id }, { repo }) {
+    deleteCard(_parent, { id }, { repo, sessionId }) {
       const deleted = repo.deleteCard(id);
       pubsub.publish('cardDeleted', {
         cardDeleted: deleted,
-        sessionId: context.sessionId,
+        sessionId: sessionId,
       });
       return deleted;
     },
