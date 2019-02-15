@@ -49,57 +49,54 @@ export const resolvers = {
     },
   },
   Mutation: {
-    createCard(_parent, { input }, { repo, userId, sessionId }: Context) {
+    async createCard(_parent, { input }, { repo, userId, sessionId }: Context) {
       const card = repo.createCard(sessionId, userId, input);
-      // pubsub.publish('cardCreated', {
-      //   cardCreated: card,
-      //   sessionId: sessionId,
-      // });
+      await pubsub.publish('cardCreated', {
+        cardCreated: card,
+        sessionId: sessionId,
+      });
       return card;
     },
 
-    updateCard(_parent, { id, input }, { repo, sessionId }: Context) {
+    async updateCard(_parent, { id, input }, { repo, sessionId }: Context) {
       const updated = repo.updateCard(id, input);
-      // pubsub.publish('cardUpdated', {
-      //   cardUpdated: updated,
-      //   sessionId: sessionId,
-      // });
+      await pubsub.publish('cardUpdated', {
+        cardUpdated: updated,
+        sessionId: sessionId,
+      });
       return updated;
     },
 
-    deleteCard(_parent, { id }, { repo, sessionId }: Context) {
+    async deleteCard(_parent, { id }, { repo, sessionId }: Context) {
       const deleted = repo.deleteCard(id);
-      // pubsub.publish('cardDeleted', {
-      //   cardDeleted: deleted,
-      //   sessionId: sessionId,
-      // });
+      await pubsub.publish('cardDeleted', {
+        cardDeleted: deleted,
+        sessionId: sessionId,
+      });
       return deleted;
     },
   },
   Subscription: {
     cardCreated: {
-      subscribe: () =>
-        withFilter(
-          () => pubsub.asyncIterator('cardCreated'),
-          (payload, _variables, context) =>
-            context.sessionId === payload.sessionId,
-        ),
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('cardCreated'),
+        (payload, _variables, context) =>
+          context && context.sessionId === payload.sessionId,
+      ),
     },
     cardUpdated: {
-      subscribe: () =>
-        withFilter(
-          () => pubsub.asyncIterator('cardUpdated'),
-          (payload, _variables, context) =>
-            context.sessionId === payload.sessionId,
-        ),
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('cardUpdated'),
+        (payload, _variables, context) =>
+          context && context.sessionId === payload.sessionId,
+      ),
     },
     cardDeleted: {
-      subscribe: () =>
-        withFilter(
-          () => pubsub.asyncIterator('cardDeleted'),
-          (payload, _variables, context) =>
-            context.sessionId === payload.sessionId,
-        ),
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('cardDeleted'),
+        (payload, _variables, context) =>
+          context && context.sessionId === payload.sessionId,
+      ),
     },
   },
 };

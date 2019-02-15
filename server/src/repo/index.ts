@@ -30,7 +30,7 @@ export class Repo {
   updateSession = (id: string, args: Partial<Session>): Promise<Session> =>
     this.db(`sessions[${id}]`).write(R.merge(args));
 
-  deleteSession = async (id: String): Promise<Session> => {
+  deleteSession = async (id: string): Promise<Session> => {
     const session = await this.db(`sessions[${id}]`)();
     const users = session.users.map(this.deleteUser);
     await this.db('sessions').write(R.dissocPath([id]));

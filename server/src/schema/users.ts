@@ -40,7 +40,6 @@ export const typeDefs = `
 export const resolvers = {
   Query: {
     me(_parent, _args, context) {
-      console.log(context);
       return context.user;
     },
   },
@@ -61,7 +60,7 @@ export const resolvers = {
     createUser: async (_parent, { sessionId, name }, { repo }) => {
       const user = await repo.createUser(sessionId, name);
       const token = jwt.sign({ sessionId, userId: user.id, name }, SECRET);
-      //pubsub.publish('userCreated', { userCreated: user, sessionId });
+      pubsub.publish('userCreated', { userCreated: user, sessionId });
       return { token };
     },
   },
@@ -70,25 +69,23 @@ export const resolvers = {
     userCreated: {
       subscribe: withFilter(
         () => pubsub.asyncIterator('userCreated'),
-        (payload, _variables, context) => {
-          return context.sessionId === payload.sessionId;
-        },
+        (payload, _variables, context) =>
+          context && context.sessionId === payload.sessionId,
       ),
     },
     userUpdated: {
       subscribe: withFilter(
         () => pubsub.asyncIterator('userUpdated'),
         (payload, _variables, context) =>
-          context.sessionId === payload.sessionId,
+          context && context.sessionId === payload.sessionId,
       ),
     },
     userDeleted: {
-      subscribe: () =>
-        withFilter(
-          () => pubsub.asyncIterator('userDeleted'),
-          (payload, _variables, context) =>
-            context.sessionId === payload.sessionId,
-        ),
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('userDeleted'),
+        (payload, _variables, context) =>
+          context && context.sessionId === payload.sessionId,
+      ),
     },
   },
 };

@@ -1,19 +1,22 @@
 import { hot } from 'react-hot-loader/root';
 
-import React, { Component, SFC } from 'react';
+import React, { SFC } from 'react';
 import { ApolloProvider } from 'react-apollo-hooks';
 import apolloClient from './apollo';
 import { Grommet } from 'grommet';
 import { dark } from 'grommet/themes';
 import Routes from '@/Routes';
-import { Provider as AuthProvider } from '@/components/auth/Context';
+import { Provider as AuthProvider } from '@/contexts/AuthContext';
+import { Provider as SortProvider } from '@/contexts/SortContext';
 
 const App: SFC<{}> = () => (
   <AuthProvider>
     <ApolloProvider client={apolloClient}>
-      <Grommet full theme={dark}>
-        <Routes />
-      </Grommet>
+      <SortProvider>
+        <Grommet full theme={dark}>
+          <Routes />
+        </Grommet>
+      </SortProvider>
     </ApolloProvider>
   </AuthProvider>
 );

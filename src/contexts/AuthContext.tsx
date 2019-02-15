@@ -10,8 +10,11 @@ type AuthContext = {
   };
 };
 
-const Context = createContext<AuthContext>({ isLoggedIn: false, token: null });
-const { Provider: BaseProvider, Consumer } = Context;
+const AuthContext = createContext<AuthContext>({
+  isLoggedIn: false,
+  token: null,
+});
+const { Provider: BaseProvider, Consumer } = AuthContext;
 
 const Provider: SFC<{}> = props => {
   const [decoded, setDecoded] = useState(auth.decodedToken);
@@ -31,6 +34,6 @@ const Provider: SFC<{}> = props => {
   );
 };
 
-export default Context;
+export default AuthContext;
 
 export { Consumer, Provider };

@@ -1,8 +1,10 @@
 import React, { SFC } from 'react';
-import { Form, FormField, Button, Select } from 'grommet';
+import { Button, Select, TextArea, TextInput } from 'grommet';
 import { useMutation, useQuery } from 'react-apollo-hooks';
 import gql from 'graphql-tag';
 import { pathOr } from 'ramda';
+import Field from '@/components/Field';
+import { Formik } from 'formik';
 
 const CreateCard = gql`
   mutation CreateCard($input: CreateCardInput!) {
@@ -53,28 +55,56 @@ const CreateCardForm: SFC<CreateCardFormProps> = ({ onCreate, onCancel }) => {
   }
 
   return (
-    <Form
-      onSubmit={async ev => {
-        ev.preventDefault();
-        const tagList = ev.value.tags.split(',').filter(Boolean);
+    <Formik
+      onSubmit={async ({ tags, ...values }) => {
+        const tagList = tags.split(',').filter(Boolean);
         const result = await mutate({
-          variables: { input: { text: ev.value.text, tags: tagList } },
+          variables: { input: { ...values, tags: tagList } },
         });
         onCreate(result.data.createCard.id);
       }}
+      initialValues={{
+        text: '',
+        category: pathOr('', ['session', 'categories', 0], data),
+        tags: '',
+      }}
     >
-      <FormField name="text" label="Text:" />
-      <FormField name="category" label="Category:">
-        <Select options={pathOr([], ['session', 'categories'], data)} />
-      </FormField>
-      <FormField name="tags" label="Tags (comma separated):" />
-      <Button
-        onClick={onCancel}
-        label="Nevermind"
-        margin={{ right: 'medium' }}
-      />
-      <Button primary type="submit" label="Add Card" />
-    </Form>
+      {({ values, handleSubmit, handleChange, handleBlur, setFieldValue }) => (
+        <form onSubmit={handleSubmit}>
+          <Field label="Text:">
+            <TextArea
+              name="text"
+              value={values.text}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+          </Field>
+          <Field label="Category:">
+            <Select
+              name="category"
+              options={pathOr([], ['session', 'categories'], data)}
+              value={values.category}
+              onChange={val => setFieldValue('category', val)}
+              onBlur={handleBlur}
+            />
+          </Field>
+          <Field label="Tags (comma separated):">
+            <TextInput
+              name="tags"
+              value={values.tags}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+          </Field>
+          <Button
+            onClick={onCancel}
+            label="Nevermind"
+            margin={{ right: 'medium' }}
+          />
+          <Button primary type="submit" label="Add Card" />
+        </form>
+      )}
+    </Formik>
   );
 };
 

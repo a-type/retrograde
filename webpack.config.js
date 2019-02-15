@@ -96,11 +96,21 @@ module.exports = {
     }),
     new webpack.NamedModulesPlugin(),
     new WebpackPluginServe({
-      open: true,
       host: 'localhost',
       port: 8020,
       progress: 'minimal',
-      historyFallback: true,
+      historyFallback: {
+        rewrites: [
+          {
+            from: '/wps',
+            to: context => context.parsedUrl.pathname,
+          },
+          {
+            from: '/subscriptions',
+            to: context => context.parsedUrl.pathname,
+          },
+        ],
+      },
       static: outputPath,
       middleware: (app, builtins) => {
         app.use(
@@ -108,12 +118,13 @@ module.exports = {
             target: 'http://localhost:4000/',
           }),
         );
-        app.use(
-          builtins.proxy('/subscriptions', {
-            target: 'http://localhost:4000/',
-            ws: true,
-          }),
-        );
+        const wsProxy = builtins.proxy('/subscriptions', {
+          target: 'ws://localhost:4000/',
+          ws: true,
+          changeOrigin: true,
+          logLevel: 'debug',
+        });
+        app.use(wsProxy);
       },
     }),
   ],
